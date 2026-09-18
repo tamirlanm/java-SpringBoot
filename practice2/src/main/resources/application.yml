@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: practice2
+
+practice2:
+  environment: default
+  max-items: 25
+  request-timeout: 2s
