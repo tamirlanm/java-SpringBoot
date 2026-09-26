@@ -1,0 +1,4 @@
+practice1:
+  environment: test
+  max-items: 5
+  request-timeout: 1s

@@ -1,0 +1,4 @@
+practice1:
+  environment: development
+  max-items: 100
+  request-timeout: 5s

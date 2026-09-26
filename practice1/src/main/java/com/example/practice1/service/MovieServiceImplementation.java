@@ -3,17 +3,20 @@ package com.example.practice1.service;
 import com.example.practice1.dto.MovieResponseDTO;
 import com.example.practice1.dto.MovieRequestDTO;
 import com.example.practice1.models.Movie;
-import org.apache.coyote.BadRequestException;
+import com.example.practice1.storage.MovieStorage;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
 public class MovieServiceImplementation implements MovieService{
-    private final List<Movie> textDatabase = new CopyOnWriteArrayList<>();
+    private final MovieStorage movieStorage;
+
+    public MovieServiceImplementation(MovieStorage movieStorage){
+        this.movieStorage = movieStorage;
+    }
 
     @Override
     public MovieResponseDTO createMovie(MovieRequestDTO movieRequestDTO) {
@@ -23,25 +26,28 @@ public class MovieServiceImplementation implements MovieService{
         movie.setDescription(movieRequestDTO.getDescription());
         movie.setPrice(movieRequestDTO.getPrice());
 
-        textDatabase.add(movie);
+        movieStorage.add(movie);
         return mapToResponseDTO(movie);
     }
 
     @Override
     public List<MovieResponseDTO> getAllMovies() {
-        return textDatabase.stream().map(this::mapToResponseDTO).collect(Collectors.toList());
+        return movieStorage.findAll().stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
     @Override
     public MovieResponseDTO getMovie(UUID id) {
-        Movie movie = textDatabase.stream().filter(m -> m.getId().equals(id)).findFirst().orElse(null);
+        Movie movie = movieStorage.findById(id);
 
         return  mapToResponseDTO(movie);
     }
 
     @Override
     public MovieResponseDTO updateMovie(UUID id, MovieRequestDTO movieRequestDTO) {
-        Movie exists = textDatabase.stream().filter(m -> m.getId().equals(id)).findFirst().orElseThrow(() -> new RuntimeException("Movie with ID " + id + "not found."));
+        Movie exists = movieStorage.findById(id);
+        if(exists==null){
+            throw new RuntimeException("Movie with ID " + id + " does not exist");
+        }
 
         exists.setTitle(movieRequestDTO.getTitle());
         exists.setDescription(movieRequestDTO.getDescription());
@@ -51,7 +57,7 @@ public class MovieServiceImplementation implements MovieService{
 
     @Override
     public void deleteMovie(UUID id) {
-        boolean removed = textDatabase.removeIf(m -> m.getId().equals(id));
+        boolean removed = movieStorage.deleteById(id);
         if(!removed) {
             throw new RuntimeException("Movie with ID" + id + "not found.");
         }
