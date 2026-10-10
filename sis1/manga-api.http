@@ -1,0 +1,189 @@
+@baseUrl = http://localhost:8081
+###
+POST {{baseUrl}}/api/mangas
+Content-Type: application/json
+
+{
+  "title": "My Manga",
+  "author": "Example Author",
+  "description": "An adventure story.",
+  "status": "ONGOING",
+  "chaptersCount": 10
+}
+
+> {%
+    client.test("Created with Location", function () {
+        client.assert(response.status === 201, "Expected 201");
+        client.assert(
+            response.headers.valueOf("Location") !== null,
+            "Location header is missing"
+        );
+    });
+
+    if (response.status === 201) {
+        client.global.set("mangaId", response.body.id);
+    }
+%}
+###
+GET {{baseUrl}}/api/mangas
+
+> {%
+    client.test("List returned", function () {
+        client.assert(response.status === 200, "Expected 200");
+        client.assert(Array.isArray(response.body), "Expected an array");
+    });
+%}
+###
+GET {{baseUrl}}/api/mangas/{{mangaId}}
+
+> {%
+    client.test("Manga returned", function () {
+        client.assert(response.status === 200, "Expected 200");
+        client.assert(response.body.title === "My Manga", "Unexpected title");
+    });
+%}
+###
+PUT {{baseUrl}}/api/mangas/{{mangaId}}
+Content-Type: application/json
+
+{
+  "title": "My Manga Updated",
+  "author": "Example Author",
+  "description": "Updated description.",
+  "status": "COMPLETED",
+  "chaptersCount": 20
+}
+
+> {%
+    client.test("Manga updated", function () {
+        client.assert(response.status === 200, "Expected 200");
+        client.assert(
+            response.body.title === "My Manga Updated",
+            "Title was not updated"
+        );
+        client.assert(response.body.chaptersCount === 20, "Wrong chapters count");
+    });
+%}
+###
+POST {{baseUrl}}/api/mangas
+Content-Type: application/json
+
+{
+  "title": "",
+  "author": "Example Author",
+  "status": "ONGOING",
+  "chaptersCount": -1
+}
+
+> {%
+    client.test("Validation errors returned", function () {
+        client.assert(response.status === 400, "Expected 400");
+        client.assert(
+            response.body.fieldErrors.title !== undefined,
+            "Title error is missing"
+        );
+        client.assert(
+            response.body.fieldErrors.chaptersCount !== undefined,
+            "Chapters count error is missing"
+        );
+    });
+%}
+###
+PUT {{baseUrl}}/api/mangas/{{mangaId}}
+Content-Type: application/json
+
+{
+  "title": " ",
+  "author": "",
+  "status": null,
+  "chaptersCount": -5
+}
+
+> {%
+    client.test("Invalid update rejected", function () {
+        client.assert(response.status === 400, "Expected 400");
+        client.assert(response.body.status === 400, "Wrong error body status");
+    });
+%}
+###
+POST {{baseUrl}}/api/mangas
+Content-Type: application/json
+
+{
+  "title": "Invalid Status Manga",
+  "author": "Example Author",
+  "status": "UNKNOWN",
+  "chaptersCount": 10
+}
+
+> {%
+    client.test("Invalid enum rejected", function () {
+        client.assert(response.status === 400, "Expected 400");
+        client.assert(response.body.fieldErrors !== undefined, "Wrong error format");
+    });
+%}
+###
+POST {{baseUrl}}/api/mangas
+Content-Type: application/json
+
+{
+  "title": "Broken JSON"
+}
+
+> {%
+    client.test("Malformed JSON rejected", function () {
+        client.assert(response.status === 400, "Expected 400");
+        client.assert(response.body.path === "/api/mangas", "Wrong error path");
+    });
+%}
+###
+GET {{baseUrl}}/api/mangas/abc
+
+> {%
+    client.test("Invalid ID rejected", function () {
+        client.assert(response.status === 400, "Expected 400");
+    });
+%}
+###
+DELETE {{baseUrl}}/api/mangas/{{mangaId}}
+
+> {%
+    client.test("Manga deleted", function () {
+        client.assert(response.status === 204, "Expected 204");
+    });
+%}
+###
+GET {{baseUrl}}/api/mangas/{{mangaId}}
+
+> {%
+    client.test("Deleted manga not found", function () {
+        client.assert(response.status === 404, "Expected 404");
+        client.assert(response.body.status === 404, "Wrong error body status");
+        client.assert(response.body.fieldErrors !== undefined, "Wrong error format");
+    });
+%}
+###
+PUT {{baseUrl}}/api/mangas/{{mangaId}}
+Content-Type: application/json
+
+{
+  "title": "Missing Manga",
+  "author": "Example Author",
+  "description": "Test",
+  "status": "ONGOING",
+  "chaptersCount": 10
+}
+
+> {%
+    client.test("Missing manga update rejected", function () {
+        client.assert(response.status === 404, "Expected 404");
+    });
+%}
+###
+DELETE {{baseUrl}}/api/mangas/{{mangaId}}
+
+> {%
+    client.test("Missing manga delete rejected", function () {
+        client.assert(response.status === 404, "Expected 404");
+    });
+%}

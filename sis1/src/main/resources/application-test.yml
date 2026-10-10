@@ -1,0 +1,6 @@
+server:
+  port: 8081
+
+app:
+  sis1:
+    seed-enabled: false

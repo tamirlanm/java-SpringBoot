@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: manga-api
+
+server:
+  port: 8080
+
+app:
+  sis1:
+    seed-enabled: false

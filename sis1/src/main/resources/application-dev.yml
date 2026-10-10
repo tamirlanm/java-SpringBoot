@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+app:
+  sis1:
+    seed-enabled: true
+
+logging:
+  level:
+    com.example.sis1: DEBUG
