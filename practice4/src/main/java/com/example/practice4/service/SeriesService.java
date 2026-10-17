@@ -42,7 +42,7 @@ public class SeriesService{
     @Transactional(readOnly = true)
     public Page<SeriesResponse> getSeries(int page, int size, String sortBy, String direction, String title, String genre){
         int safePage = Math.max(page, 0);
-        int safeSize = Math.max(Math.max(size, 1), 20);
+        int safeSize = Math.min(Math.max(size, 1), 20);
 
         Set<String> allowedSorts = Set.of("id", "title", "genre", "releaseYear");
 
