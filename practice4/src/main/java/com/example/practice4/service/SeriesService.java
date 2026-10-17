@@ -3,6 +3,7 @@ package com.example.practice4.service;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import com.example.practice4.dto.SeriesRequest;
 import com.example.practice4.dto.SeriesResponse;
 import com.example.practice4.entity.Series;
 import com.example.practice4.repository.SeriesRepository;
@@ -18,6 +19,25 @@ public class SeriesService{
     public SeriesService(SeriesRepository repository){
         this.repository = repository;
     }
+
+    @Transactional
+    public SeriesResponse create(SeriesRequest request){
+        Series series = new Series(
+            request.title(),
+            request.genre(),
+            request.releaseYear()
+        );
+
+        Series saved = repository.save(series);
+
+        return new SeriesResponse(
+            saved.getId(),
+            saved.getTitle(),
+            saved.getGenre(),
+            saved.getReleaseYear()
+        );
+    }
+
 
     @Transactional(readOnly = true)
     public Page<SeriesResponse> getSeries(int page, int size, String sortBy, String direction, String title, String genre){

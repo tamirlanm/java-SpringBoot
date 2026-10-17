@@ -26,6 +26,12 @@ public class Series {
     private List<Episode> episodes = new ArrayList<>();
 
     protected Series() {}
+
+    public Series(String title, String genre, Integer releaseYear){
+        this.title = title;
+        this.genre = genre;
+        this.releaseYear = releaseYear;
+    }
     public Long getId() { return id;}
     public String getTitle() { return title;}
     public  String getGenre() { return genre; }
