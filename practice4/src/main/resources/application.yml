@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: practice4
+    
+  profiles:
+    default: dev
+
+  datasource:
+    username: postgres
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  sql:
+    init:
+      mode: always
